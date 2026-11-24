@@ -1,3 +1,7 @@
+> **Capstone submission · Ticket to Merge (BOOK-101)** · branch `feat/book-101-search`
+>
+> Everything the submission checklist asks for is in **[`ticket-to-merge/README.md`](ticket-to-merge/README.md)**: how to run `/ship-ticket` and `/review-pr`, the green test run, planted-bug recall and precision over 3 runs, the cost report with one lever, and the design reasoning. The ticket brief is [`SPEC.md`](SPEC.md) and the conventions are in [`CLAUDE.md`](CLAUDE.md).
+
 ```
 ╔═════════════════════════════════════════════╗
 ║│▓│▒│░│█│▓│░│▒│█│▓│▒│░│█│▓│░│▒│█│▓│▒│░│█│▓│░│║
