@@ -2,6 +2,7 @@
 name: review-pr
 description: Review the current branch's diff with read-only specialists (security, correctness) and a verifier, and return JSON findings with file, line and evidence. Usage - /ticket-to-merge:review-pr [base ref]
 argument-hint: "[base ref or sha; default: merge-base with main]"
+allowed-tools: Agent, Read, Grep, Glob, Bash(node *hooks/phase.mjs*), Bash(node *scripts/review-diff.mjs*), Bash(node *scripts/finalize-findings.mjs*)
 ---
 Review the current branch. You orchestrate: you don't review code yourself and nothing in this skill edits a file. Don't ask the user anything.
 

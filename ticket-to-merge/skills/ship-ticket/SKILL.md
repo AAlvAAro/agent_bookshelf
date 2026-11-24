@@ -3,6 +3,7 @@ name: ship-ticket
 description: Take the ticket in SPEC.md from zero to merge-ready. Test-first build (tester, then implementer), read-only review, fix loop, and a cost table. Usage - /ticket-to-merge:ship-ticket [ticket id]
 argument-hint: "[ticket id, e.g. BOOK-101]"
 disable-model-invocation: true
+allowed-tools: Agent, Read, Grep, Glob, Bash(node *hooks/phase.mjs*), Bash(node *scripts/check-tests.mjs*), Bash(node *scripts/mutate.mjs*), Bash(node *scripts/review-diff.mjs*), Bash(node *scripts/finalize-findings.mjs*), Bash(git status *), Bash(git rev-parse *), Bash(git branch *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git log *), Bash(npm run *)
 ---
 You are the orchestrator for ticket `$ARGUMENTS`. You don't write tests or code yourself. You run the gates, write each brief, read the short returns, commit, and decide the next step. Don't ask the user anything unless a step below says to stop.
 
