@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Planted-bug eval for /ticket-to-merge:review-pr. Node built-ins only.
-//   node ticket-to-merge/evals/run-review-evals.mjs [--runs 3] [--label base] [--model sonnet] [--subagent-model haiku]
+//   node ticket-to-merge/evals/run-review-evals.mjs [--set planted|hard] [--runs 3] [--label base] [--model sonnet] [--subagent-model haiku]
 // For each run it builds two throwaway branches off main in a temp clone:
-//   planted = the BOOK-101 implementation + bugs.patch (6 planted bugs, 2 clean decoys)
+//   planted = the BOOK-101 implementation + evals/<set>/bugs.patch (planted bugs and clean decoys)
 //   clean   = the BOOK-101 implementation as shipped (any finding here is a false positive)
 // then runs review-pr headless on each, parses the JSON findings and scores them.
 // Recall = plants found / plants. Precision = findings that match a plant / all findings (both cases).
@@ -15,10 +15,11 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const PLUGIN = dirname(HERE);
 const REPO = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: HERE, encoding: 'utf8' }).trim();
-const expected = JSON.parse(readFileSync(join(HERE, 'planted/expected.json'), 'utf8'));
 const arg = (name, dflt) => { const i = process.argv.indexOf(`--${name}`); return i > 0 ? process.argv[i + 1] : dflt; };
+const SET = arg('set', 'planted');
+const expected = JSON.parse(readFileSync(join(HERE, SET, 'expected.json'), 'utf8'));
 const RUNS = Number(arg('runs', 3));
-const LABEL = arg('label', 'base');
+const LABEL = arg('label', SET === 'planted' ? 'base' : SET);
 const MODEL = arg('model', 'sonnet');
 const SUBAGENT_MODEL = arg('subagent-model', '');
 const LINE_TOLERANCE = 3;
@@ -29,7 +30,7 @@ function workspace(kind, run) {
   execFileSync('git', ['clone', '-q', REPO, dir], { stdio: 'pipe' });
   git('checkout', '-q', '-b', `eval/${kind}`, 'origin/main');
   git('checkout', expected.impl, '--', 'src', 'tests');
-  if (kind === 'planted') git('apply', join(HERE, 'planted/bugs.patch'));
+  if (kind === 'planted') git('apply', join(HERE, SET, 'bugs.patch'));
   git('add', '-A');
   git('commit', '-qm', 'feat: search books by title or author');
   return dir;
@@ -58,17 +59,21 @@ function review(dir) {
 
 /** Line of each plant in this workspace, found by its anchor text. */
 function plantLines(dir) {
-  return expected.plants.map((p) => {
-    const lines = readFileSync(join(dir, p.file), 'utf8').split('\n');
-    return { ...p, line: lines.findIndex((l) => l.includes(p.anchor)) + 1 };
-  });
+  // A plant can show up in more than one place (a new dependency: package.json and the import).
+  return expected.plants.map((p) => ({
+    ...p,
+    spots: [{ file: p.file, anchor: p.anchor }, ...(p.also || [])].map((a) => {
+      const lines = readFileSync(join(dir, a.file), 'utf8').split('\n');
+      return { file: a.file, line: lines.findIndex((l) => l.includes(a.anchor)) + 1 };
+    }),
+  }));
 }
 
 function score(findings, plants) {
   const found = new Set();
   const rows = findings.map((f) => {
     const text = `${f.issue} ${f.evidence}`;
-    const hit = plants.filter((p) => p.file === f.file && Math.abs(Number(f.line) - p.line) <= LINE_TOLERANCE && new RegExp(p.keywords, 'i').test(text));
+    const hit = plants.filter((p) => new RegExp(p.keywords, 'i').test(text) && p.spots.some((s) => s.file === f.file && Math.abs(Number(f.line) - s.line) <= LINE_TOLERANCE));
     hit.forEach((p) => found.add(p.id));
     return { file: f.file, line: f.line, severity: f.severity, issue: f.issue, matches: hit.map((p) => p.id) };
   });
@@ -99,7 +104,7 @@ const found = planted.reduce((n, r) => n + r.found.length, 0);
 const total = results.reduce((n, r) => n + r.total, 0);
 const real = results.reduce((n, r) => n + r.real, 0);
 const summary = {
-  label: LABEL, model: MODEL, subagentModel: SUBAGENT_MODEL || 'agent default (sonnet)', runs: RUNS,
+  label: LABEL, set: SET, model: MODEL, subagentModel: SUBAGENT_MODEL || 'agent default (sonnet)', runs: RUNS,
   recall: found / (N * planted.length), precision: total ? real / total : 1,
   cost: results.reduce((n, r) => n + r.cost, 0),
 };

@@ -144,9 +144,22 @@ Decoys (must not be flagged): a fixed column list interpolated into SQL with val
 
 This is the current plugin. I reran the eval after adding the OWASP Top 10 sweep to `review-security`, because a wider checklist can add false positives. It didn't: the totals are the same as before the sweep (`evals/results/base.json`, also 18/18 and 18/19), and the clean branch stayed at zero findings in all 3 runs. The sweep has nothing to find in these plants, so this shows it adds no noise here, not that it catches more.
 
-Two honest notes:
+**A harder set.** Because the first set scored 100%, `evals/hard/` plants six issues meant to be easier to miss, with two more decoys (a constant-only `ORDER BY`, and the escaping moved into a helper):
+
+| ID | File | Planted issue |
+|---|---|---|
+| H1 | `package.json` | A new dependency (lodash), used only for trimming |
+| H2 | `src/routes/api.ts` | Stack trace sent to the client, raw query logged |
+| H3 | `src/db/schema.sql` | Schema change: a new index "for performance" |
+| H4 | `src/views/books/search-results.ejs` | Query echoed unescaped into the no-results HTML |
+| H5 | `src/models/book.ts` | Empty query returns nothing instead of all books |
+| H6 | `tests/search/search-routes.test.ts` | A test whose only assertion can't fail |
+
+Over 3 runs: **recall 100% (18/18) · precision 100% (20/20)**, zero findings on the clean branch, no decoy flagged (`node ticket-to-merge/evals/run-review-evals.mjs --set hard`, results in `evals/results/hard.json`). For H2, every run reported the stack trace; none mentioned the logged query.
+
+Honest notes:
 - The one unmatched finding says the HTML route skips the model's validation. That is a true consequence of P1, but the scorer only credits P1 for injection wording. I kept the scorer strict instead of changing it after seeing the result.
-- A perfect recall means this eval is too easy to trust far. The plants are textbook cases written alongside the reviewers' checklists. Harder plants are the first thing to add.
+- Two sets at 100% recall still don't show where the reviewer breaks. Every plant sits on a changed line in a diff of about 100 lines, and I wrote both the plants and the reviewers' checklists. What this doesn't test: a bug that needs reasoning across files, a much larger diff, or a defect in code the diff didn't touch.
 
 ### Cost report
 
