@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: Review the current branch's diff with read-only specialists (security, correctness) and a verifier, and return JSON findings with file, line and evidence. Usage - /ticket-to-merge:review-pr [base ref]
+description: Use whenever the user asks to review a branch, PR, diff or recent changes before merging. Reviews the diff against its base (default the merge-base with main) with read-only security and correctness specialists and a verifier that drops what it can't prove, and returns one JSON array of findings with file, line and evidence. Reports only; never edits. Usage - /ticket-to-merge:review-pr [base ref]
 argument-hint: "[base ref or sha; default: merge-base with main]"
 allowed-tools: Agent, Read, Grep, Glob, Bash(node *hooks/phase.mjs*), Bash(node *scripts/review-diff.mjs*), Bash(node *scripts/finalize-findings.mjs*)
 ---

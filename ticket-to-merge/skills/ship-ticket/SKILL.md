@@ -1,6 +1,6 @@
 ---
 name: ship-ticket
-description: Take the ticket in SPEC.md from zero to merge-ready. Test-first build (tester, then implementer), read-only review, fix loop, and a cost table. Usage - /ticket-to-merge:ship-ticket [ticket id]
+description: Use whenever the user asks to ship, build or implement the ticket in SPEC.md end to end. Takes it from zero to merge-ready test-first (tester, then implementer), runs the read-only review and a fix loop, commits locally, never pushes, and prints a cost table. Usage - /ticket-to-merge:ship-ticket [ticket id]
 argument-hint: "[ticket id, e.g. BOOK-101]"
 disable-model-invocation: true
 allowed-tools: Agent, Read, Grep, Glob, Bash(node *hooks/phase.mjs*), Bash(node *scripts/check-tests.mjs*), Bash(node *scripts/mutate.mjs*), Bash(node *scripts/review-diff.mjs*), Bash(node *scripts/finalize-findings.mjs*), Bash(git status *), Bash(git rev-parse *), Bash(git branch *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git log *), Bash(npm run *)
