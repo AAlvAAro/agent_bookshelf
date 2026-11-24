@@ -22,13 +22,21 @@ Inside Claude Code:
 | `/ticket-to-merge:ship-ticket BOOK-101` | Builds the ticket in `SPEC.md` test-first, reviews it, runs the fix loop, prints a cost table. Needs a clean tree on a feature branch. |
 | `/ticket-to-merge:review-pr [base]` | Reviews the current branch against its merge-base with `main` (or the base you pass). Prints one JSON block of findings: `file, line, severity, issue, evidence, reviewer`. Edits nothing. |
 
+For a measured or headless run, start Claude through the launchers. They pin `--model sonnet`, grant the skill's `allowed-tools` with `--allowedTools`, turn off `ScheduleWakeup`, and refuse to run (exit 3) if their rules drift from the skill's frontmatter:
+
+```bash
+ticket-to-merge/scripts/review.sh [-p] [--dry-run] [base]
+ticket-to-merge/scripts/ship.sh   [-p] [--dry-run] [ticket id]
+```
+
 `review-pr` works on a branch it has never seen. If the branch has no `SPEC.md`, it uses the ticket as issued, bundled in `tickets/BOOK-101.md`.
 
 Other checks:
 
 ```bash
 npm run test:run                                         # the app's suite
-node --test ticket-to-merge/hooks/test/                  # guardrail bypass suite
+node --test ticket-to-merge/hooks/test/                  # guardrail bypass suite + save-verifier hook
+node --test ticket-to-merge/scripts/test/                # finalize-findings and the launchers
 node ticket-to-merge/scripts/mutate.mjs                  # mutation check (no tokens, ~20s)
 node ticket-to-merge/evals/run-review-evals.mjs --runs 3 # planted-bug eval (spends tokens)
 ```
@@ -188,6 +196,61 @@ About two thirds of the total is the orchestrator, not the agents: it carries th
 
 So I'd use the lever for `ship-ticket` and keep `review-pr` on Sonnet until a larger eval says otherwise. The plugin doesn't pin the orchestrator's model; it's the `--model` you start Claude with.
 
+## Improvements borrowed from other capstone solutions
+
+Branch `feat/ttm-improvements`. I read six other BOOK-101 plugins as data (cloned outside the repo, nothing from them installed or run) and took five ideas, one commit each, measured with the same eval before and after.
+
+| # | Idea | Model | What changed here |
+|---|---|---|---|
+| 1 | Deterministic last step | Deyvi's `anchor-lines.mjs`, Moreta's `check-findings.js` | `scripts/finalize-findings.mjs`: moves a finding to the line that holds its quoted evidence, drops findings more than 8 lines from any change, and holds back the ones the verifier marks `"proven": false` in `.ticket-to-merge/unconfirmed.json`. `review-diff.mjs` now writes the changed lines to `.ticket-to-merge/review.json`. 11 `node --test` cases. |
+| 2 | Verifier output saved by a hook | Deyvi's `save-findings.mjs` | `hooks/save-verifier.mjs` (SubagentStop) writes the verifier's report to `.ticket-to-merge/verifier.json`; finalize reads it, so the orchestrator never retypes findings. |
+| 3 | Launchers | Paul's `ship.sh` / `review.sh` | `scripts/ship.sh`, `scripts/review.sh`: `--model sonnet`, `--allowedTools` from the skills' new `allowed-tools`, `--disallowedTools ScheduleWakeup`, `-p`, `--dry-run`; exit 3 when the rules drift from the frontmatter. |
+| 4 | Shell discipline | several | Both skills: one literal command per Bash call, agents in the foreground, a permission denial never ends the task. |
+| 5 | Trigger wording | Quirino's `review-pr` | Both descriptions start with "Use whenever the user asks to...". |
+
+Not taken: prompt-injection detection in `review-diff.mjs` (left out of this round).
+
+### Before and after (`run-review-evals.mjs`, 3 runs per set, Sonnet)
+
+| Set | | Cost per review | Recall | Precision | Clean branch findings |
+|---|---|---|---|---|---|
+| planted | before | $0.77 | 100% (18/18) | 100% (18/18) | 0 in 3 runs |
+| planted | after | $0.74 | 100% (18/18) | 95% (18/19) | 0 in 3 runs |
+| hard | before | $0.72 | 100% (18/18) | 90% (18/20) | 0 in 3 runs |
+| hard | after | $0.74 | 100% (18/18) | 100% (20/20) | 0 in 3 runs |
+
+Results: `evals/results/before-improvements.json`, `evals/results/after-improvements.json`. Cost per review averages the planted and clean reviews.
+
+What the numbers say, and what they don't:
+- **No measurable gain in recall or precision.** Both sets were already at the ceiling. Precision moved by one finding each way: the planted set's one unmatched finding (`books.ts:15`, "the HTML route bypasses `searchBooks`") is the same P1 side effect that already appeared in `base.json` and `owasp-sweep.json`, before any of these changes; the hard set's two unmatched findings before were the no-results text vs. the tests, which didn't come back. Three runs can't separate that from noise. Cost per review is flat.
+- **The first after-run was much worse, and it was idea 1's fault.** In `evals/results/after-improvements-attempt1.json` five of six planted reviews printed no JSON block (planted recall 0%, hard 33%): the orchestrator saw finalize's output in its tool result and wrote "the report above" instead of repeating it. The findings themselves were right. Fixed by telling it the user can't see tool output and must get the report copied word for word (`1b7558b`); the table above is the rerun.
+- **Idea 2 needed two fixes before it worked.** A SubagentStop entry with a matcher never ran on Claude Code 2.1.331 (tried `^ticket-to-merge:review-verifier$` and `review-verifier`), so the hook has no matcher and filters on `agent_type` itself. And some verifier runs (2 of my 4 debug runs) return their report through a `SubagentHandback` tool call, leaving `last_assistant_message` empty, so the hook reads the handback from the agent's transcript (with a short retry while the transcript is flushed).
+- **The `proven` flag hid a real bug in a smoke run.** The verifier first marked P6 (validation answered with 200) "not proven" because the ticket names no status code, though the branch's own tests expect 400. The instruction now says a test in the repo counts as the statement of intent, and `proven: false` is only for code it can't trace. No plant was held back in the 12 measured reviews.
+- **Idea 3 checked for real:** `review.sh -p` on the planted branch, with only the narrow rules granted, finished with 0 permission denials and 6 confirmed findings. The eval runner still grants plain `Bash`, so ideas 3 and 4 don't show up in the table.
+- Durations aren't compared: the baseline reported 6–14 s per review, which doesn't match three agents running, so I don't trust that column.
+
+### Plugin eval: with vs without the plugin (stretch B)
+
+`plugin-evals/` has two `claude plugin eval` cases for `review-pr`. Each workspace is built by `_lib/scaffold.sh` with `git archive` from this repo (`main` plus the BOOK-101 implementation, plus `evals/hard/bugs.patch` for the hard case). It copies neither the plugin nor `expected.json`. Both arms get the same prompt, which never names the skill. Scored graders are regexes on the final reply: for each plant, one finding with its file, a line within ±3 and a plant keyword (`review-hard`); a line holding only `[]` (`review-clean`). `skill-fired` is a with-only indicator.
+
+```bash
+PATH=/Applications/Xcode.app/Contents/Developer/usr/bin:$PATH \
+claude plugin eval ./ticket-to-merge --eval-dir plugin-evals --runs 3 --scaffold --trust-plugin \
+  --model sonnet --judge-model sonnet --ablation with-without --max-cost-usd 10 --no-publish \
+  --disallow-tools ScheduleWakeup \
+  --allow-tools "Bash(node *hooks/phase.mjs*)" "Bash(node *scripts/review-diff.mjs*)" "Bash(node *scripts/finalize-findings.mjs*)" \
+    "Bash(git diff *)" "Bash(git log *)" "Bash(git show *)" "Bash(git status *)" "Bash(git rev-parse *)" "Bash(git merge-base *)"
+```
+
+| Case | With plugin | Without | Δ | Notes |
+|---|---|---|---|---|
+| `review-hard` | 1.00 (6/6 in all 3 runs) | 0.78 | **+0.22** | Without missed H3 (schema index) in all 3 runs and H6 (a test that can't fail) in 1. |
+| `review-clean` | 1.00 (`[]` in all 3 runs) | 0.67 | **+0.33** | Without reported findings on the clean branch in 1 of 3 runs. |
+
+Total cost $2.27 for 12 runs. A with-plugin hard review cost about twice the plain one ($0.29 vs $0.15). The harness's per-run cost is lower than the runner's ($0.85), so the two tables aren't comparable on cost. The judge model is set but unused, since every scored grader is a regex. Results: `plugin-evals/results/2026-11-24T23-31-41-041Z/`.
+
+Why the `PATH`: shell grants run in an OS sandbox, and `/usr/bin/git` on macOS is the xcrun shim, which can't write its cache there ("Operation not permitted"). The first probe's with arm stopped after `review-diff.mjs` failed to find a base, and printed an explained `[]`. With the Xcode git first on `PATH` (same for both arms) the reviews run normally.
+
 ## Layout
 
 ```
@@ -197,7 +260,9 @@ ticket-to-merge/
 ├── skills/review-pr/SKILL.md        # orchestrator: review only
 ├── agents/                          # tester, implementer, review-security, review-correctness, review-verifier
 ├── hooks/                           # hooks.json, protect, integrity, gate, phase, test/
-├── scripts/                         # check-tests (red/green gate), mutate (mutation check), review-diff (numbered diff)
+├── scripts/                         # check-tests (red/green gate), mutate (mutation check), review-diff (numbered diff),
+│                                    # finalize-findings (last review step), ship.sh / review.sh (launchers), test/
 ├── tickets/BOOK-101.md              # the ticket as issued
-└── evals/                           # bugs.patch, expected.json, runner, cost-split, results/
+├── evals/                           # bugs.patch, expected.json, runner, cost-split, results/
+└── plugin-evals/                    # claude plugin eval cases for review-pr (with vs without the plugin)
 ```

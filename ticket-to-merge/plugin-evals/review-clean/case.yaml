@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: review-clean
+description: "BOOK-101 branch as shipped, no plants: the review should return []."
+tags: [review-pr]
+context:
+  scaffold_script: fixture.sh

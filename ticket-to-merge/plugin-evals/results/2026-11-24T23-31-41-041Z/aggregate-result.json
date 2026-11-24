@@ -1,0 +1,729 @@
+{
+  "schemaVersion": 1,
+  "claudeVersion": "2.1.331",
+  "startedAt": "2026-11-24T23:31:41.041Z",
+  "durationSeconds": 222,
+  "costUsd": 2.2729363,
+  "partial": false,
+  "suite": {
+    "root": "/Users/aalvaaro/Projects/Ballastlane/agent_bookshelf/ticket-to-merge",
+    "ablation": "with-without",
+    "modelOverride": "sonnet",
+    "judgeModel": "sonnet",
+    "threshold": 1,
+    "concurrency": 2,
+    "plugins": [
+      {
+        "name": "ticket-to-merge",
+        "version": "0.1.0",
+        "path": "/Users/aalvaaro/Projects/Ballastlane/agent_bookshelf/ticket-to-merge"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "review-clean",
+      "dir": "plugin-evals/review-clean",
+      "source": "mixed",
+      "promptMarkdown": "Please review this branch's changes against `main` before I open the PR. They implement ticket BOOK-101, \"Search books by title or author\".\n\nAcceptance criteria:\n- A query matches title or author: partial, case-insensitive\n- An empty query returns all books\n- Input is trimmed; over 100 characters returns a validation error\n- SQL is parameterised: no string-built queries\n- Vitest covers each criterion; `npm run test:run` passes\n\nConstraints: no schema changes, no new dependencies, never touch `bookshelf.db`, `seed.sql` or `.env`, keep the interface exactly as specified.\n\nReport only real problems. Don't change any files. End your reply with the findings as one JSON array in a ```json block, each finding `{\"file\": ..., \"line\": <line in the new file>, \"severity\": \"high|medium|low\", \"issue\": ..., \"evidence\": ...}`, or `[]` if there are none.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 900,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "empty-array",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "^[ \\t]*\\[\\s*\\][ \\t]*$",
+            "flags": "m",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?review-pr\"",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 12,
+            "costUsd": 0.17098150000000004,
+            "judgeCostUsd": 0,
+            "durationSeconds": 29,
+            "startedAt": "2026-11-24T23:31:41.061Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-64w13e/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "empty-array",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^[ \\t]*\\[\\s*\\][ \\t]*$",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 10,
+            "costUsd": 0.16395040000000002,
+            "judgeCostUsd": 0,
+            "durationSeconds": 27,
+            "startedAt": "2026-11-24T23:31:41.061Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-NC7n01/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "empty-array",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^[ \\t]*\\[\\s*\\][ \\t]*$",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 12,
+            "costUsd": 0.16675569999999998,
+            "judgeCostUsd": 0,
+            "durationSeconds": 30,
+            "startedAt": "2026-11-24T23:32:07.815Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-L7MXxf/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "empty-array",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^[ \\t]*\\[\\s*\\][ \\t]*$",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0,
+            "passed": false,
+            "turns": 14,
+            "costUsd": 0.15549449999999998,
+            "judgeCostUsd": 0,
+            "durationSeconds": 27,
+            "startedAt": "2026-11-24T23:32:10.482Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-nip6DW/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "empty-array",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in last_message",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 13,
+            "costUsd": 0.14573799999999998,
+            "judgeCostUsd": 0,
+            "durationSeconds": 24,
+            "startedAt": "2026-11-24T23:32:37.128Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-6csWnn/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "empty-array",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^[ \\t]*\\[\\s*\\][ \\t]*$",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 15,
+            "costUsd": 0.1582885,
+            "judgeCostUsd": 0,
+            "durationSeconds": 27,
+            "startedAt": "2026-11-24T23:32:38.157Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-Wy7NId/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "empty-array",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched ^[ \\t]*\\[\\s*\\][ \\t]*$",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 0.6666666666666666,
+        "passRateWithout": 0.6666666666666666,
+        "delta": 0.33333333333333337
+      }
+    },
+    {
+      "name": "review-hard",
+      "dir": "plugin-evals/review-hard",
+      "source": "mixed",
+      "promptMarkdown": "Please review this branch's changes against `main` before I open the PR. They implement ticket BOOK-101, \"Search books by title or author\".\n\nAcceptance criteria:\n- A query matches title or author: partial, case-insensitive\n- An empty query returns all books\n- Input is trimmed; over 100 characters returns a validation error\n- SQL is parameterised: no string-built queries\n- Vitest covers each criterion; `npm run test:run` passes\n\nConstraints: no schema changes, no new dependencies, never touch `bookshelf.db`, `seed.sql` or `.env`, keep the interface exactly as specified.\n\nReport only real problems. Don't change any files. End your reply with the findings as one JSON array in a ```json block, each finding `{\"file\": ..., \"line\": <line in the new file>, \"severity\": \"high|medium|low\", \"issue\": ..., \"evidence\": ...}`, or `[]` if there are none.",
+      "runsPerCase": 3,
+      "timeoutSeconds": 900,
+      "maxTurns": 60,
+      "graders": [
+        {
+          "name": "h1",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "\\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?package\\.json\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:41|42|43|44|45|46|47)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:19|20|21|22|23|24|25)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:39|40|41|42|43|44|45)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:dependenc|lodash|A06|package))",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "h2",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "\\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/api\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:20|21|22|23|24|25|26)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:stack|leak|expos|log|A05|A09|internal|disclos))",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "h3",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "\\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/db\\/schema\\.sql\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:51|52|53|54|55|56|57)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:schema|index))",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "h4",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "\\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/views\\/books\\/search-results\\.ejs\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:1|2|3|4|5)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/books\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:12|13|14|15|16|17|18)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:xss|escap|<%-|script|html|inject|A03))",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "h5",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "\\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:43|44|45|46|47|48|49)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:empty|all books|\\[\\]|whitespace))",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "h6",
+          "type": "regex",
+          "weight": 1,
+          "config": {
+            "target": "last_message",
+            "pattern": "\\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?tests\\/search\\/search-routes\\.test\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:25|26|27|28|29|30|31)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:toBeDefined|assert|fail|weak|always pass|prove))",
+            "flags": "i",
+            "match": "contains"
+          }
+        },
+        {
+          "name": "skill-fired",
+          "type": "tool_used",
+          "weight": 1,
+          "config": {
+            "tool": "Skill",
+            "input_match": "\"skill\"\\s*:\\s*\"(?:[\\w-]+:)?review-pr\"",
+            "arm": "with-only"
+          }
+        }
+      ],
+      "arms": {
+        "with": [
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 11,
+            "costUsd": 0.2828621,
+            "judgeCostUsd": 0,
+            "durationSeconds": 56,
+            "startedAt": "2026-11-24T23:33:01.527Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-a3bgvs/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "h1",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?package\\.json\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:41|42|43|44|45|46|47)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:19|20|21|22|23|24|25)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:39|40|41|42|43|44|45)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:dependenc|lodash|A06|package))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h2",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/api\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:20|21|22|23|24|25|26)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:stack|leak|expos|log|A05|A09|internal|disclos))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h3",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/db\\/schema\\.sql\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:51|52|53|54|55|56|57)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:schema|index))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h4",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/views\\/books\\/search-results\\.ejs\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:1|2|3|4|5)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/books\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:12|13|14|15|16|17|18)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:xss|escap|<%-|script|html|inject|A03))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h5",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:43|44|45|46|47|48|49)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:empty|all books|\\[\\]|whitespace))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h6",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?tests\\/search\\/search-routes\\.test\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:25|26|27|28|29|30|31)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:toBeDefined|assert|fail|weak|always pass|prove))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 11,
+            "costUsd": 0.28758379999999995,
+            "judgeCostUsd": 0,
+            "durationSeconds": 56,
+            "startedAt": "2026-11-24T23:33:05.318Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-gNme3r/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "h1",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?package\\.json\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:41|42|43|44|45|46|47)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:19|20|21|22|23|24|25)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:39|40|41|42|43|44|45)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:dependenc|lodash|A06|package))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h2",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/api\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:20|21|22|23|24|25|26)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:stack|leak|expos|log|A05|A09|internal|disclos))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h3",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/db\\/schema\\.sql\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:51|52|53|54|55|56|57)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:schema|index))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h4",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/views\\/books\\/search-results\\.ejs\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:1|2|3|4|5)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/books\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:12|13|14|15|16|17|18)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:xss|escap|<%-|script|html|inject|A03))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h5",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:43|44|45|46|47|48|49)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:empty|all books|\\[\\]|whitespace))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h6",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?tests\\/search\\/search-routes\\.test\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:25|26|27|28|29|30|31)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:toBeDefined|assert|fail|weak|always pass|prove))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          },
+          {
+            "score": 1,
+            "passed": true,
+            "turns": 12,
+            "costUsd": 0.2853968,
+            "judgeCostUsd": 0,
+            "durationSeconds": 57,
+            "startedAt": "2026-11-24T23:33:57.464Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-iwD7vO/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "h1",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?package\\.json\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:41|42|43|44|45|46|47)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:19|20|21|22|23|24|25)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:39|40|41|42|43|44|45)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:dependenc|lodash|A06|package))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h2",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/api\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:20|21|22|23|24|25|26)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:stack|leak|expos|log|A05|A09|internal|disclos))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h3",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/db\\/schema\\.sql\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:51|52|53|54|55|56|57)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:schema|index))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h4",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/views\\/books\\/search-results\\.ejs\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:1|2|3|4|5)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/books\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:12|13|14|15|16|17|18)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:xss|escap|<%-|script|html|inject|A03))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h5",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:43|44|45|46|47|48|49)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:empty|all books|\\[\\]|whitespace))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h6",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?tests\\/search\\/search-routes\\.test\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:25|26|27|28|29|30|31)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:toBeDefined|assert|fail|weak|always pass|prove))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "skill-fired",
+                "passed": true,
+                "weight": 1,
+                "explanation": "Skill called 1x (expected 1..∞)",
+                "withOnly": true,
+                "scored": false
+              }
+            ]
+          }
+        ],
+        "without": [
+          {
+            "score": 0.8333333333333334,
+            "passed": false,
+            "turns": 12,
+            "costUsd": 0.1504344,
+            "judgeCostUsd": 0,
+            "durationSeconds": 30,
+            "startedAt": "2026-11-24T23:34:01.573Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-BnRGeK/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "h1",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?package\\.json\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:41|42|43|44|45|46|47)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:19|20|21|22|23|24|25)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:39|40|41|42|43|44|45)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:dependenc|lodash|A06|package))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h2",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/api\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:20|21|22|23|24|25|26)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:stack|leak|expos|log|A05|A09|internal|disclos))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h3",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in last_message",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h4",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/views\\/books\\/search-results\\.ejs\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:1|2|3|4|5)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/books\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:12|13|14|15|16|17|18)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:xss|escap|<%-|script|html|inject|A03))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h5",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:43|44|45|46|47|48|49)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:empty|all books|\\[\\]|whitespace))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h6",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?tests\\/search\\/search-routes\\.test\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:25|26|27|28|29|30|31)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:toBeDefined|assert|fail|weak|always pass|prove))",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.6666666666666666,
+            "passed": false,
+            "turns": 12,
+            "costUsd": 0.1454867,
+            "judgeCostUsd": 0,
+            "durationSeconds": 25,
+            "startedAt": "2026-11-24T23:34:31.273Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-fb32lO/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "h1",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?package\\.json\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:41|42|43|44|45|46|47)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:19|20|21|22|23|24|25)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:39|40|41|42|43|44|45)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:dependenc|lodash|A06|package))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h2",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/api\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:20|21|22|23|24|25|26)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:stack|leak|expos|log|A05|A09|internal|disclos))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h3",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in last_message",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h4",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/views\\/books\\/search-results\\.ejs\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:1|2|3|4|5)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/books\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:12|13|14|15|16|17|18)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:xss|escap|<%-|script|html|inject|A03))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h5",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:43|44|45|46|47|48|49)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:empty|all books|\\[\\]|whitespace))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h6",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in last_message",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          },
+          {
+            "score": 0.8333333333333334,
+            "passed": false,
+            "turns": 13,
+            "costUsd": 0.1599639,
+            "judgeCostUsd": 0,
+            "durationSeconds": 29,
+            "startedAt": "2026-11-24T23:34:54.496Z",
+            "error": null,
+            "tracePath": "/private/tmp/e-Qj5zgy/out/trace.jsonl",
+            "skippedPaidGraders": false,
+            "graders": [
+              {
+                "name": "h1",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?package\\.json\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:41|42|43|44|45|46|47)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:19|20|21|22|23|24|25)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:39|40|41|42|43|44|45)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:dependenc|lodash|A06|package))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h2",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/api\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:20|21|22|23|24|25|26)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:stack|leak|expos|log|A05|A09|internal|disclos))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h3",
+                "passed": false,
+                "weight": 1,
+                "explanation": "pattern not found in last_message",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h4",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/views\\/books\\/search-results\\.ejs\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:1|2|3|4|5)(?!\\d))|(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/routes\\/books\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:12|13|14|15|16|17|18)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:xss|escap|<%-|script|html|inject|A03))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h5",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?src\\/models\\/book\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:43|44|45|46|47|48|49)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:empty|all books|\\[\\]|whitespace))",
+                "withOnly": false,
+                "scored": true
+              },
+              {
+                "name": "h6",
+                "passed": true,
+                "weight": 1,
+                "explanation": "matched \\{(?:(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"file\"\\s*:\\s*\"(?:[^\"\\\\]*/)?tests\\/search\\/search-routes\\.test\\.ts\")(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"line\"\\s*:\\s*\"?(?:25|26|27|28|29|30|31)(?!\\d)))(?=(?:[^{}\"]|\"(?:[^\"\\\\]|\\\\.)*\")*?\"(?:issue|evidence)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*?(?:toBeDefined|assert|fail|weak|always pass|prove))",
+                "withOnly": false,
+                "scored": true
+              }
+            ]
+          }
+        ]
+      },
+      "aggregates": {
+        "score": 1,
+        "passRate": 1,
+        "scoreWithout": 0.7777777777777778,
+        "passRateWithout": 0,
+        "delta": 0.2222222222222222
+      }
+    }
+  ],
+  "aggregates": {
+    "casesTotal": 2,
+    "casesPassed": 2,
+    "overallScore": 1,
+    "overallPassRate": 1,
+    "meanDelta": 0.2777777777777778
+  }
+}

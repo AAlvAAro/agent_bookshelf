@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: review-hard
+description: "BOOK-101 branch with the 6 plants of evals/hard (H1 lodash dependency, H2 stack trace leak, H3 schema index, H4 unescaped query in HTML, H5 empty query returns nothing, H6 test that can't fail)."
+tags: [review-pr]
+context:
+  scaffold_script: fixture.sh
