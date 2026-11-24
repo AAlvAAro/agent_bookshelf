@@ -9,6 +9,7 @@ You are the orchestrator for ticket `$ARGUMENTS`. You don't write tests or code 
 Scripts (run them exactly like this):
 - Phase: `node "${CLAUDE_PLUGIN_ROOT}/hooks/phase.mjs" <off|test|implement|review>`
 - Test gate: `node "${CLAUDE_PLUGIN_ROOT}/scripts/check-tests.mjs" <red|green> --acs <N>`
+- Mutation check: `node "${CLAUDE_PLUGIN_ROOT}/scripts/mutate.mjs" --base $BASE`
 
 The phase makes directories read-only through a hook: `test` locks `src/`, `implement` locks `tests/`, `review` locks both. Set it before every agent call. Only you can change it.
 
@@ -32,8 +33,9 @@ The phase makes directories read-only through a hook: `test` locks `src/`, `impl
 2. Call the **ticket-to-merge:implementer** agent with the test file paths. A SubagentStop hook keeps it working while the suite is red (3 tries).
 3. Run the test gate in `green` mode, then the build command from CLAUDE.md.
    - FAIL: one more implementer call with the gate's output. Still FAIL: phase `off`, stop and report what fails.
-4. Check the SPEC constraints yourself: `git diff $BASE --stat` shows no change to the schema, the dependency list in `package.json`, or any protected file, and `git diff $RED -- tests` is empty (the tests are still the ones committed red).
-5. Commit: `git add -A && git commit -m "feat: <ticket title> (<ticket>)"`.
+4. Run the mutation check. It breaks each line the ticket added, one small change at a time, and reports changes no test noticed. It is a report, not a gate: keep its score line and its "Survived" list for the final report and carry on.
+5. Check the SPEC constraints yourself: `git diff $BASE --stat` shows no change to the schema, the dependency list in `package.json`, or any protected file, and `git diff $RED -- tests` is empty (the tests are still the ones committed red).
+6. Commit: `git add -A && git commit -m "feat: <ticket title> (<ticket>)"`.
 
 ## 3. Review
 1. Phase `review`.
@@ -66,7 +68,7 @@ Pass on only what the next step needs (paths, gate output, findings JSON), never
 | # | Stage (build / review / fix) | Agent | Model | Tokens | Tool uses | Duration | Result |
 |---|---|---|---|---|---|---|---|
 
-2. `Verdict: READY | BLOCKED · tests <passed>/<total> · criteria covered <n>/<N> · review rounds <r>/2 · open findings <c>`.
+2. `Verdict: READY | BLOCKED · tests <passed>/<total> · criteria covered <n>/<N> · mutation <killed>/<valid> · review rounds <r>/2 · open findings <c>`.
 3. `git log --oneline $BASE..HEAD`.
-4. Criteria the red gate reported as already satisfied before implementation.
+4. Criteria the red gate reported as already satisfied before implementation, and every mutant that survived (each one is a test worth adding).
 5. Remind the user to run `/usage` now and note the cost for this stage.

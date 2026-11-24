@@ -29,6 +29,7 @@ Other checks:
 ```bash
 npm run test:run                                         # the app's suite
 node --test ticket-to-merge/hooks/test/                  # guardrail bypass suite
+node ticket-to-merge/scripts/mutate.mjs                  # mutation check (no tokens, ~20s)
 node ticket-to-merge/evals/run-review-evals.mjs --runs 3 # planted-bug eval (spends tokens)
 ```
 
@@ -105,6 +106,19 @@ $ npm run test:run
 
 Every criterion AC1–AC7 has tests named after it, on the model, the JSON route and the HTML route. `npm run build` is clean. `schema.sql`, `seed.sql` and `package.json` are unchanged.
 
+### Mutation check: do the tests notice broken code?
+
+The red and green gates prove the tests fail before the code exists and pass after. They don't prove the tests would catch a wrong implementation. `scripts/mutate.mjs` checks that: it takes every line the ticket added to `src/`, makes one small change at a time (`>` to `>=`, `OR` to `AND`, `100` to `101`, drop a `.trim()`, a `throw` or a `.status(400)`), and runs the suite in a throwaway copy. No model calls, no dependencies.
+
+```
+$ node ticket-to-merge/scripts/mutate.mjs
+MUTATION: 16/16 killed (100%) · 0 survived · 0 invalid · suite 52 tests
+```
+
+To check the tool can report a miss, I ran it with the AC4 and AC5 tests removed: the score fell to 11/16 and the 5 survivors were exactly the length limit and the wildcard escaping. `ship-ticket` runs it after the green gate as a report, not a gate; a survivor is listed as a test worth adding.
+
+Limits: 16 mutants from 15 simple operators is a small sample, and it only mutates TypeScript lines the ticket added, not templates.
+
 ### Planted bugs: recall and precision over 3 runs
 
 `evals/planted/bugs.patch` plants 6 bugs in a copy of the implementation, with 2 clean decoys. A second branch is the clean implementation, where any finding is a false positive. Both are built off `main` with no `SPEC.md` or `CLAUDE.md`, like a branch someone else wrote.
@@ -168,7 +182,7 @@ ticket-to-merge/
 ├── skills/review-pr/SKILL.md        # orchestrator: review only
 ├── agents/                          # tester, implementer, review-security, review-correctness, review-verifier
 ├── hooks/                           # hooks.json, protect, integrity, gate, phase, test/
-├── scripts/                         # check-tests (red/green gate), review-diff (numbered diff for reviewers)
+├── scripts/                         # check-tests (red/green gate), mutate (mutation check), review-diff (numbered diff)
 ├── tickets/BOOK-101.md              # the ticket as issued
 └── evals/                           # bugs.patch, expected.json, runner, cost-split, results/
 ```
