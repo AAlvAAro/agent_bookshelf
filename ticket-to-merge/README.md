@@ -136,11 +136,13 @@ Decoys (must not be flagged): a fixed column list interpolated into SQL with val
 
 | Run | Planted: found | Planted: findings | Not matched to a plant | Clean: findings |
 |---|---|---|---|---|
-| 1 | 6/6 | 6 | 0 | 0 |
+| 1 | 6/6 | 7 | 1 | 0 |
 | 2 | 6/6 | 6 | 0 | 0 |
-| 3 | 6/6 | 7 | 1 | 0 |
+| 3 | 6/6 | 6 | 0 | 0 |
 
-**Recall 100% (18/18) · Precision 95% (18/19)**. Results: `evals/results/base.json`.
+**Recall 100% (18/18) · Precision 95% (18/19)**. Results: `evals/results/owasp-sweep.json`.
+
+This is the current plugin. I reran the eval after adding the OWASP Top 10 sweep to `review-security`, because a wider checklist can add false positives. It didn't: the totals are the same as before the sweep (`evals/results/base.json`, also 18/18 and 18/19), and the clean branch stayed at zero findings in all 3 runs. The sweep has nothing to find in these plants, so this shows it adds no noise here, not that it catches more.
 
 Two honest notes:
 - The one unmatched finding says the HTML route skips the model's validation. That is a true consequence of P1, but the scorer only credits P1 for injection wording. I kept the scorer strict instead of changing it after seeing the result.
