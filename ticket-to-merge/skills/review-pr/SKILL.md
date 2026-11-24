@@ -6,6 +6,11 @@ allowed-tools: Agent, Read, Grep, Glob, Bash(node *hooks/phase.mjs*), Bash(node 
 ---
 Review the current branch. You orchestrate: you don't review code yourself and nothing in this skill edits a file. Don't ask the user anything.
 
+## Running commands and agents
+- One literal command per Bash call: no `&&`, `;`, pipes, `$(...)` or shell variables. Write shas and paths out in full. A chained command doesn't match the allowed rules and gets denied.
+- Run every subagent in the foreground, never in the background, and wait for its result.
+- A permission denial never ends the task: resend the work command by command, each as its own literal call.
+
 ## 1. Prepare
 1. `node "${CLAUDE_PLUGIN_ROOT}/hooks/phase.mjs" review` (makes `src/` and `tests/` read-only while the review runs).
 2. `node "${CLAUDE_PLUGIN_ROOT}/scripts/review-diff.mjs" $ARGUMENTS` and read its JSON: `diffFile`, `files`, `commits`, `branch`. If it returns `error`, set the phase `off`, report the error and stop. If `changedLines` is 0, report `[]` and stop.
