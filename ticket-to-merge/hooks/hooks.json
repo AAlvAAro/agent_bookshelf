@@ -47,7 +47,6 @@
         ]
       },
       {
-        "matcher": "^ticket-to-merge:review-verifier$",
         "hooks": [
           {
             "type": "command",
