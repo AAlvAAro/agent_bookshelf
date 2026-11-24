@@ -34,9 +34,15 @@ node ticket-to-merge/evals/run-review-evals.mjs --runs 3 # planted-bug eval (spe
 
 ## The pipeline
 
-```
-SPEC.md ──► tester ──► red gate ──► implementer ──► green gate ──► reviewers ──► verifier ──► fix loop (max 2)
- (human)   (sonnet)    (script)      (sonnet)     (script+hook)   (2, parallel)  (sonnet)   tester → implementer
+```mermaid
+flowchart LR
+    spec["SPEC.md<br/>(human)"] --> tester["tester<br/>(sonnet)"]
+    tester --> red{{"red gate<br/>(script)"}}
+    red --> impl["implementer<br/>(sonnet)"]
+    impl --> green{{"green gate<br/>(script + hook)"}}
+    green --> reviewers["reviewers<br/>(2, parallel)"]
+    reviewers --> verifier["verifier<br/>(sonnet)"]
+    verifier -. "fix loop (max 2)" .-> tester
 ```
 
 | Agent | Tools | Model | Job |
@@ -55,7 +61,7 @@ The main session is the orchestrator (`skills/ship-ticket`, `skills/review-pr`).
 
 **The spec is human work.** There is no planner or product agent. `SPEC.md` is the brief the agents treat as truth, so it was written and checked by hand. The ticket left the interface open; `SPEC.md` fills it from what the repo already has (`searchBooks()` in the model, the search box calling `GET /books/search?q=`, the API's `400` + `{ "error" }` convention).
 
-**Gates are scripts.** In an earlier project my reviewer agent listed a required change and still approved. So here a pass never rests on one agent's word:
+**Gates are scripts.** I've seen a reviewer agent list a required change and still approve, so a pass never rests on one agent's word:
 - `scripts/check-tests.mjs red` — every criterion has a test named after it, something fails, no test file failed to load, no older test broke.
 - `scripts/check-tests.mjs green` — everything passes and every criterion still has a test.
 - `hooks/gate.mjs` (SubagentStop) — the implementer can't finish while the suite is red; it gets back only the failing test names (3 tries).
@@ -66,7 +72,7 @@ The main session is the orchestrator (`skills/ship-ticket`, `skills/review-pr`).
 
 **Models.** Everything that writes or judges code runs on Sonnet: the tests define "done" and the hidden tests grade the result. Haiku is where I measured the lever (below).
 
-**What I'd cut.** The verifier, if precision on a larger eval stays the same without it; I haven't measured the review with and without it yet. And the tester step in the fix loop for low-severity findings.
+**What I'd cut.** A planner, a third reviewer and worktrees are already gone. The verifier is the next candidate: precision is 18/19 with it, but I haven't run the review without it, so it stays until that comparison shows the specialists are as precise alone.
 
 ## Guardrails
 
