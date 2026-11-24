@@ -24,17 +24,10 @@ Scope: only lines the diff added or changed. Return only the JSON array.
 ```
 
 ## 3. Verify
-If both returned `[]`, skip to step 4. Otherwise call **ticket-to-merge:review-verifier** once with every candidate (tag each with `"reviewer"`), the diff file path and the spec path. Keep only its `confirmed` list.
+If both returned `[]`, skip to step 4. Otherwise call **ticket-to-merge:review-verifier** once with every candidate (tag each with `"reviewer"`), the diff file path and the spec path.
 
 ## 4. Report
 1. `node "${CLAUDE_PLUGIN_ROOT}/hooks/phase.mjs" off` (when called from ship-ticket, it sets the next phase itself).
-2. Print the result in exactly this shape, findings sorted by severity then file and line. The JSON block must be the only fenced block in your reply, and `[]` when there are none:
-
-Review of `<branch>` against `<base>` · <n> files · spec: <spec used>
-
-```json
-[{"file": "src/models/book.ts", "line": 27, "severity": "high", "issue": "...", "evidence": "...", "reviewer": "security"}]
-```
-
-Then one line: `Findings: <confirmed> confirmed (<high> high, <medium> medium, <low> low) · <dropped> dropped by the verifier`, and one line per dropped candidate with the verifier's reason.
-3. A row per agent call (agent, model, tokens, tool uses, duration) plus a Total row, taken from the agent results.
+2. Finalize, always as the last step. If the verifier ran: `node "${CLAUDE_PLUGIN_ROOT}/scripts/finalize-findings.mjs" --spec <spec used>`. If you skipped it: the same command with `--none` added. The script corrects line numbers from the quoted evidence, drops findings far from any change, holds back findings the verifier marked not proven, and saves the result to `.ticket-to-merge/findings.json`. If it exits with an error, print the verifier's `confirmed` list in the same shape yourself.
+3. Print the script's output as it is: it is the report, and its JSON block must be the only fenced block in your reply.
+4. A row per agent call (agent, model, tokens, tool uses, duration) plus a Total row, taken from the agent results.

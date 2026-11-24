@@ -15,9 +15,11 @@ For each candidate in your brief:
 
 Then merge duplicates: two candidates about the same defect become one, keeping the clearer wording, the most precise line and the higher severity. Fix the line number and severity if the candidate had them wrong. Don't add findings of your own.
 
+Set `"proven": true` when you traced the defect in the code yourself. When you could neither prove nor disprove a candidate, keep it with `"proven": false`: it is held back for a human instead of published.
+
 ## Return
 Only a JSON object, nothing before or after it:
 ```json
-{"confirmed": [{"file": "...", "line": 0, "severity": "high|medium|low", "issue": "...", "evidence": "...", "reviewer": "security|correctness"}],
+{"confirmed": [{"file": "...", "line": 0, "severity": "high|medium|low", "issue": "...", "evidence": "...", "reviewer": "security|correctness", "proven": true}],
  "dropped": [{"file": "...", "line": 0, "issue": "...", "reason": "one sentence"}]}
 ```

@@ -1,0 +1,563 @@
+{
+  "label": "before-improvements",
+  "sets": {
+    "planted": {
+      "summary": {
+        "label": "before-improvements-planted",
+        "set": "planted",
+        "model": "sonnet",
+        "subagentModel": "agent default (sonnet)",
+        "runs": 3,
+        "recall": 1,
+        "precision": 1,
+        "cost": 4.6413549000000005
+      },
+      "results": [
+        {
+          "run": 1,
+          "kind": "planted",
+          "ok": true,
+          "cost": 0.8959075,
+          "seconds": 9,
+          "found": [
+            "P1",
+            "P2",
+            "P3",
+            "P4",
+            "P5",
+            "P6"
+          ],
+          "real": 6,
+          "total": 6,
+          "rows": [
+            {
+              "file": "src/models/book.ts",
+              "line": 38,
+              "severity": "high",
+              "issue": "Off-by-one: a trimmed query of exactly 100 characters is rejected. The spec only rejects queries over 100 characters.",
+              "matches": [
+                "P2"
+              ]
+            },
+            {
+              "file": "src/models/book.ts",
+              "line": 42,
+              "severity": "high",
+              "issue": "The LIKE pattern is built from the untrimmed `query`, not `trimmed`. A padded query such as '  dune  ' misses 'Dune'.",
+              "matches": [
+                "P4"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 26,
+              "severity": "high",
+              "issue": "`/books/search` is registered after `/books/:id`, so the search handler is unreachable. The request returns 404 'Book not found'.",
+              "matches": [
+                "P3"
+              ]
+            },
+            {
+              "file": "src/routes/books.ts",
+              "line": 17,
+              "severity": "high",
+              "issue": "SQL injection. The HTML search route interpolates `q` into the SQL string and bypasses the parameterised Book.searchBooks. It also skips the 100-character limit and LIKE escaping, and `String()` coerces arrays instead of rejecting them. The SearchValidationError catch is unreachable.",
+              "matches": [
+                "P1"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 31,
+              "severity": "medium",
+              "issue": "A validation error returns HTTP 200 instead of 400. The added tests expect 400.",
+              "matches": [
+                "P6"
+              ]
+            },
+            {
+              "file": "tests/search/search-model.test.ts",
+              "line": 87,
+              "severity": "medium",
+              "issue": "The boundary test for exactly 100 characters is skipped, which hides the off-by-one in searchBooks.",
+              "matches": [
+                "P5"
+              ]
+            }
+          ],
+          "missed": []
+        },
+        {
+          "run": 1,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.6565681999999999,
+          "seconds": 14,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        },
+        {
+          "run": 2,
+          "kind": "planted",
+          "ok": true,
+          "cost": 0.8727166,
+          "seconds": 10,
+          "found": [
+            "P1",
+            "P2",
+            "P3",
+            "P4",
+            "P5",
+            "P6"
+          ],
+          "real": 6,
+          "total": 6,
+          "rows": [
+            {
+              "file": "src/models/book.ts",
+              "line": 38,
+              "severity": "high",
+              "issue": "The length check uses >=, so a trimmed query of exactly 100 characters is rejected. The spec rejects only queries over 100 characters.",
+              "matches": [
+                "P2"
+              ]
+            },
+            {
+              "file": "src/models/book.ts",
+              "line": 42,
+              "severity": "high",
+              "issue": "The LIKE pattern is built from the untrimmed `query`, not `trimmed`. Input such as '  dune  ' searches for '%  dune  %' and finds nothing, so the spec's trimming requirement is not met.",
+              "matches": [
+                "P4"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 26,
+              "severity": "high",
+              "issue": "/books/search is registered after /books/:id, so Express matches :id='search' first. The handler is unreachable, and the request gets a 404 'Book not found' because parseInt gives NaN.",
+              "matches": [
+                "P3"
+              ]
+            },
+            {
+              "file": "src/routes/books.ts",
+              "line": 17,
+              "severity": "high",
+              "issue": "The HTML search route builds SQL by string interpolation of user input and bypasses Book.searchBooks. That allows SQL injection, breaks the 'no string-built queries' criterion, and skips the 100-character, single-string and LIKE-escape handling. The SearchValidationError catch is dead code, and ?q=a&q=b is coerced to 'a,b' by String().",
+              "matches": [
+                "P1"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 31,
+              "severity": "medium",
+              "issue": "A validation error is returned with HTTP 200 instead of 400. The HTML route returns 400 for the same error, and the PR's own API tests assert 400.",
+              "matches": [
+                "P6"
+              ]
+            },
+            {
+              "file": "tests/search/search-model.test.ts",
+              "line": 87,
+              "severity": "medium",
+              "issue": "The boundary test for exactly 100 characters is skipped with it.skip. This hides the off-by-one bug in the length check, and the spec requires tests that cover each criterion.",
+              "matches": [
+                "P5"
+              ]
+            }
+          ],
+          "missed": []
+        },
+        {
+          "run": 2,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.6863313,
+          "seconds": 12,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        },
+        {
+          "run": 3,
+          "kind": "planted",
+          "ok": true,
+          "cost": 0.8682223,
+          "seconds": 9,
+          "found": [
+            "P1",
+            "P2",
+            "P3",
+            "P4",
+            "P5",
+            "P6"
+          ],
+          "real": 6,
+          "total": 6,
+          "rows": [
+            {
+              "file": "src/models/book.ts",
+              "line": 38,
+              "severity": "high",
+              "issue": "The length check uses >=, so a query of exactly 100 characters is rejected. The spec only rejects queries over 100.",
+              "matches": [
+                "P2"
+              ]
+            },
+            {
+              "file": "src/models/book.ts",
+              "line": 42,
+              "severity": "high",
+              "issue": "The LIKE pattern is built from the untrimmed `query` instead of `trimmed`. Leading or trailing whitespace stays in the pattern, so the search misses matches.",
+              "matches": [
+                "P4"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 26,
+              "severity": "high",
+              "issue": "`/books/search` is registered after `/books/:id`. Express matches 'search' as an id, `parseInt` returns NaN, and the response is 404, so the search handler is unreachable.",
+              "matches": [
+                "P3"
+              ]
+            },
+            {
+              "file": "src/routes/books.ts",
+              "line": 17,
+              "severity": "high",
+              "issue": "The HTML search route builds SQL by interpolating the raw `q` into the query string. This allows SQL injection and breaks the spec's parameterised-SQL criterion. It also bypasses `Book.searchBooks`, so there is no 100-char limit, no LIKE escaping and no array check. `?q=a&q=b` becomes 'a,b', and the `SearchValidationError` catch is dead code.",
+              "matches": [
+                "P1"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 31,
+              "severity": "medium",
+              "issue": "The validation error is returned with HTTP 200 instead of 400.",
+              "matches": [
+                "P6"
+              ]
+            },
+            {
+              "file": "tests/search/search-model.test.ts",
+              "line": 87,
+              "severity": "medium",
+              "issue": "The boundary test for exactly 100 characters is `it.skip`. It hides the off-by-one bug.",
+              "matches": [
+                "P5"
+              ]
+            }
+          ],
+          "missed": []
+        },
+        {
+          "run": 3,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.661609,
+          "seconds": 13,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        }
+      ]
+    },
+    "hard": {
+      "summary": {
+        "label": "before-improvements-hard",
+        "set": "hard",
+        "model": "sonnet",
+        "subagentModel": "agent default (sonnet)",
+        "runs": 3,
+        "recall": 1,
+        "precision": 0.9,
+        "cost": 4.2928178
+      },
+      "results": [
+        {
+          "run": 1,
+          "kind": "planted",
+          "ok": true,
+          "cost": 0.8569142999999998,
+          "seconds": 10,
+          "found": [
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6"
+          ],
+          "real": 6,
+          "total": 6,
+          "rows": [
+            {
+              "file": "package.json",
+              "line": 44,
+              "severity": "high",
+              "issue": "Adds the new dependency lodash. The spec constraint is 'No new dependencies'. It is used only for trim, which String.prototype.trim does natively.",
+              "matches": [
+                "H1"
+              ]
+            },
+            {
+              "file": "src/db/schema.sql",
+              "line": 54,
+              "severity": "high",
+              "issue": "Adds a new index, which is a schema change. The spec constraint is 'No schema changes'.",
+              "matches": [
+                "H3"
+              ]
+            },
+            {
+              "file": "src/models/book.ts",
+              "line": 46,
+              "severity": "high",
+              "issue": "An empty or whitespace-only query returns [] instead of all books. The spec says 'An empty query returns all books'. The tests added in this diff (AC2, expecting 50 books) would fail. The HTML route in src/routes/books.ts line 15 inherits this and renders the no-results template for an empty query.",
+              "matches": [
+                "H5"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 23,
+              "severity": "high",
+              "issue": "The 500 response sends the server stack trace to the client, which discloses internal paths and implementation details.",
+              "matches": [
+                "H2"
+              ]
+            },
+            {
+              "file": "src/views/books/search-results.ejs",
+              "line": 2,
+              "severity": "high",
+              "issue": "Reflected XSS. The user-supplied q is printed unescaped with <%- %>, and the 100-character limit still allows a script payload. The markup also includes the query text, but the added tests expect exactly '<p class=\"no-results\">No books found</p>', so those tests fail.",
+              "matches": [
+                "H4"
+              ]
+            },
+            {
+              "file": "tests/search/search-routes.test.ts",
+              "line": 28,
+              "severity": "medium",
+              "issue": "The API title-match test only asserts that res.body is defined, so it can never fail. The spec requires Vitest to cover each criterion, and this test gives no real coverage of the title match.",
+              "matches": [
+                "H6"
+              ]
+            }
+          ],
+          "missed": []
+        },
+        {
+          "run": 1,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.7484780000000002,
+          "seconds": 7,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        },
+        {
+          "run": 2,
+          "kind": "planted",
+          "ok": true,
+          "cost": 0.8367206,
+          "seconds": 10,
+          "found": [
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6"
+          ],
+          "real": 6,
+          "total": 7,
+          "rows": [
+            {
+              "file": "package.json",
+              "line": 44,
+              "severity": "high",
+              "issue": "lodash was added as a new dependency, which the spec forbids (\"No new dependencies\"). It is used only for trim, and String.prototype.trim does the same job.",
+              "matches": [
+                "H1"
+              ]
+            },
+            {
+              "file": "src/db/schema.sql",
+              "line": 54,
+              "severity": "high",
+              "issue": "A new index was added to the schema, which violates the spec constraint \"No schema changes\".",
+              "matches": [
+                "H3"
+              ]
+            },
+            {
+              "file": "src/models/book.ts",
+              "line": 46,
+              "severity": "high",
+              "issue": "An empty or whitespace-only query returns [] instead of all books. The spec says an empty query returns all books. The model and route tests also expect 50 books for this case, so they would fail.",
+              "matches": [
+                "H5"
+              ]
+            },
+            {
+              "file": "src/views/books/search-results.ejs",
+              "line": 2,
+              "severity": "high",
+              "issue": "Reflected XSS. The user-supplied query is rendered unescaped with <%- %> in an HTML response. A 100-character payload is enough, and the length limit does not stop it.",
+              "matches": [
+                "H4"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 23,
+              "severity": "medium",
+              "issue": "The raw error stack trace is sent to the client on non-validation errors, which leaks internal paths and details.",
+              "matches": [
+                "H2"
+              ]
+            },
+            {
+              "file": "src/views/books/search-results.ejs",
+              "line": 2,
+              "severity": "medium",
+              "issue": "The no-results markup does not match what the route tests assert. The template renders 'No books found for \"...\"', but the tests expect exactly '<p class=\"no-results\">No books found</p>', so those tests fail.",
+              "matches": []
+            },
+            {
+              "file": "tests/search/search-routes.test.ts",
+              "line": 28,
+              "severity": "low",
+              "issue": "The API test for AC1 title matching asserts only that res.body is defined, so it can never fail. It does not check status, contents or case-insensitivity.",
+              "matches": [
+                "H6"
+              ]
+            }
+          ],
+          "missed": []
+        },
+        {
+          "run": 2,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.3232838,
+          "seconds": 9,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        },
+        {
+          "run": 3,
+          "kind": "planted",
+          "ok": true,
+          "cost": 0.8513387,
+          "seconds": 10,
+          "found": [
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6"
+          ],
+          "real": 6,
+          "total": 7,
+          "rows": [
+            {
+              "file": "src/models/book.ts",
+              "line": 46,
+              "severity": "high",
+              "issue": "An empty or whitespace-only query returns [] instead of all books. The spec says an empty query returns all books, and the added tests expect 50 results.",
+              "matches": [
+                "H5"
+              ]
+            },
+            {
+              "file": "package.json",
+              "line": 44,
+              "severity": "high",
+              "issue": "Adds the lodash dependency, which the spec forbids (\"No new dependencies\"). It is used only for `trim`, which `String.prototype.trim` covers.",
+              "matches": [
+                "H1"
+              ]
+            },
+            {
+              "file": "src/db/schema.sql",
+              "line": 54,
+              "severity": "high",
+              "issue": "Adds a new index, which the spec forbids (\"No schema changes\").",
+              "matches": [
+                "H3"
+              ]
+            },
+            {
+              "file": "src/views/books/search-results.ejs",
+              "line": 2,
+              "severity": "high",
+              "issue": "Reflected XSS. The raw query string is written to the page unescaped with `<%-`. A query such as `<script>alert(1)</script>` matches no books, so the no-results branch renders it as live markup.",
+              "matches": [
+                "H4"
+              ]
+            },
+            {
+              "file": "src/views/books/search-results.ejs",
+              "line": 2,
+              "severity": "medium",
+              "issue": "The no-results markup does not match what the route tests assert, so those tests fail. The template adds ` for \"<q>\"`, but the tests expect exactly `<p class=\"no-results\">No books found</p>`.",
+              "matches": []
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 23,
+              "severity": "medium",
+              "issue": "The 500 response returns the raw error stack trace to the client, which discloses internal paths and details.",
+              "matches": [
+                "H2"
+              ]
+            },
+            {
+              "file": "tests/search/search-routes.test.ts",
+              "line": 28,
+              "severity": "low",
+              "issue": "The title-search API test asserts only `toBeDefined()`, so it would pass for any response. It does not check that 'prag' matches 'The Pragmatic Programmer'.",
+              "matches": [
+                "H6"
+              ]
+            }
+          ],
+          "missed": []
+        },
+        {
+          "run": 3,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.6760824,
+          "seconds": 6,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        }
+      ]
+    }
+  }
+}

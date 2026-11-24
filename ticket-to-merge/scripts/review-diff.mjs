@@ -3,9 +3,10 @@
 //   node review-diff.mjs [base]     base = a ref or sha; default: merge-base of HEAD with main
 // Writes an annotated diff to a temp file, every line prefixed with its line number in the NEW file,
 // so findings can cite exact lines. Prints a JSON summary: { base, head, diffFile, files, changedLines }.
-// Includes uncommitted changes. Node built-ins only.
+// Also writes .ticket-to-merge/review.json (changed lines per file, for finalize-findings.mjs) and clears
+// the previous review's outputs there. Includes uncommitted changes. Node built-ins only.
 import { execFileSync } from 'node:child_process';
-import { writeFileSync } from 'node:fs';
+import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, isAbsolute, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -50,7 +51,7 @@ let cur = null;
 let newLine = 0;
 for (const line of raw.split('\n')) {
   if (line.startsWith('diff --git ')) {
-    cur = { path: line.replace(/^diff --git a\/.* b\//, ''), added: 0, deleted: 0 };
+    cur = { path: line.replace(/^diff --git a\/.* b\//, ''), added: 0, deleted: 0, lines: new Set() };
     files.push(cur);
     out.push('', `===== ${cur.path} =====`);
   } else if (line.startsWith('@@')) {
@@ -60,10 +61,12 @@ for (const line of raw.split('\n')) {
     if (/^(new file|deleted file|rename |Binary)/.test(line)) out.push(`   ... ${line}`);
   } else if (line.startsWith('+')) {
     out.push(`${String(newLine).padStart(5)} + ${line.slice(1)}`);
+    cur.lines.add(newLine);
     newLine++;
     cur.added++;
   } else if (line.startsWith('-')) {
     out.push(`      - ${line.slice(1)}`);
+    cur.lines.add(newLine);
     cur.deleted++;
   } else if (line.startsWith(' ')) {
     out.push(`${String(newLine).padStart(5)}   ${line.slice(1)}`);
@@ -75,6 +78,15 @@ const head = tryGit('rev-parse', '--short', 'HEAD');
 const diffFile = join(tmpdir(), `ttm-review-${head}-${Date.now()}.diff`);
 const legend = 'Legend: "<n> + code" = added line n of the new file · "- code" = removed line · "<n>   code" = unchanged context.\n';
 writeFileSync(diffFile, legend + out.join('\n') + '\n');
+
+const stateDir = join(root, '.ticket-to-merge');
+mkdirSync(stateDir, { recursive: true });
+writeFileSync(join(stateDir, '.gitignore'), '*\n');
+// Every review starts empty, so nothing from an earlier review can be published by mistake.
+for (const name of ['verifier.json', 'findings.json', 'unconfirmed.json']) rmSync(join(stateDir, name), { force: true });
+const changed = Object.fromEntries(files.map((f) => [f.path, [...f.lines].sort((a, b) => a - b)]));
+writeFileSync(join(stateDir, 'review.json'), JSON.stringify({ base: base.slice(0, 10), branch: tryGit('branch', '--show-current'), files: files.length, changed }) + '\n');
+for (const f of files) delete f.lines;
 
 console.log(JSON.stringify({
   base: base.slice(0, 10),
