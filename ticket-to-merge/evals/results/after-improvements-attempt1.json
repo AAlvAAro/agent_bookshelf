@@ -1,0 +1,289 @@
+{
+  "label": "after-improvements-attempt1",
+  "note": "Before the review-pr fix that makes the orchestrator copy the finalize report into its reply: 5 of 6 planted reviews printed no JSON block.",
+  "sets": {
+    "planted": {
+      "summary": {
+        "label": "after-improvements-planted",
+        "set": "planted",
+        "model": "sonnet",
+        "subagentModel": "agent default (sonnet)",
+        "runs": 3,
+        "recall": 0,
+        "precision": 1,
+        "cost": 4.4792815
+      },
+      "results": [
+        {
+          "run": 1,
+          "kind": "planted",
+          "ok": false,
+          "cost": 0.8516687000000002,
+          "seconds": 127,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": [
+            "P1",
+            "P2",
+            "P3",
+            "P4",
+            "P5",
+            "P6"
+          ],
+          "raw": "Review of `eval/planted` against `0e6fb665f6` · 7 files · spec: `tickets/BOOK-101.md`\n\nThe verifier confirmed all 7 findings: 2 high, 4 medium, 1 low. It dropped none, and the finalize script held none back as not proven. The report above is the script's output. The JSON block in it is the findings list, saved to `.ticket-to-merge/findings.json`.\n\n| Agent | Model | Tokens | Tool uses | Duration |\n|---|---|---|---|---|\n| review-security | n/a | 34,586 | 2 | 20.1s |\n| review-correctness | n/a | 34,736 | 2 | 21.2s |\n| review-verifier | n/a | 31,460 | 8 | 24.8s |\n| **Total** | | **100,782** | **12** | **66.1s** |\n\nThe agent results did not report a model, so that column is blank. The duration total adds the three runs end to end, although the two reviewers ran in parallel.\n\nI ran `finalize-findings.mjs --help` once by mistake. It ran as a normal finalize with `spec: none`, then I re-ran it with `--spec`. The output above is from the second run."
+        },
+        {
+          "run": 1,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.7043382999999998,
+          "seconds": 91,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        },
+        {
+          "run": 2,
+          "kind": "planted",
+          "ok": false,
+          "cost": 0.8339820000000001,
+          "seconds": 112,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": [
+            "P1",
+            "P2",
+            "P3",
+            "P4",
+            "P5",
+            "P6"
+          ],
+          "raw": "Review of `eval/planted` against `0e6fb665f6` · 7 files · spec: `tickets/BOOK-101.md`\n\nThe findings are the JSON block above. The verifier confirmed 7 and dropped none. Nothing was held back as unproven or out of scope. The result is saved to `.ticket-to-merge/findings.json`.\n\n**Findings by severity**\n- **High (5):**\n  - `src/models/book.ts:38`: the length check rejects a query of exactly 100 characters, but the spec only rejects queries over 100.\n  - `src/models/book.ts:42`: the LIKE pattern uses the untrimmed query, so `\"  dune  \"` matches nothing.\n  - `src/routes/api.ts:26`: `/books/search` is registered after `/books/:id`, so the search endpoint returns 404 and is unreachable.\n  - `src/routes/api.ts:31`: a validation failure returns HTTP 200 instead of 400.\n  - `src/routes/books.ts:17`: SQL injection, because the HTML search route interpolates `q` straight into the SQL string.\n- **Medium (1):** `src/routes/books.ts:15`: the HTML route skips `Book.searchBooks` validation, so there is no 100-character limit and a repeated `q` is coerced instead of rejected. The `SearchValidationError` catch below it can never run.\n- **Low (1):** `tests/search/search-model.test.ts:87`: the \"exactly 100 characters is allowed\" test is skipped with `it.skip`, which hides the off-by-one.\n\n**Agent usage**\n\n| Agent | Model | Tokens | Tool uses | Duration |\n|---|---|---|---|---|\n| ticket-to-merge:review-security | not reported | 34,787 | 2 | 25.9s |\n| ticket-to-merge:review-correctness | not reported | 34,502 | 2 | 25.9s |\n| ticket-to-merge:review-verifier | not reported | 34,021 | 2 | 12.5s |\n| **Total** | | 103,310 | 6 | 64.3s (sequential-equivalent; the two reviewers ran in parallel, about 38s wall clock) |\n\nThe agent results don't include a model name, so that column is blank."
+        },
+        {
+          "run": 2,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.6206467,
+          "seconds": 77,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        },
+        {
+          "run": 3,
+          "kind": "planted",
+          "ok": false,
+          "cost": 0.8264416,
+          "seconds": 113,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": [
+            "P1",
+            "P2",
+            "P3",
+            "P4",
+            "P5",
+            "P6"
+          ],
+          "raw": "| Agent | Model | Tokens | Tool uses | Duration |\n|---|---|---|---|---|\n| review-security | n/a | 33,762 | 2 | 21.1 s |\n| review-correctness | n/a | 33,201 | 2 | 19.8 s |\n| review-verifier | n/a | 35,946 | 2 | 22.3 s |\n| **Total** | | 102,909 | 6 | 63.2 s |\n\nThe agent results don't report a model, so that column is n/a. The report above is the script's output. It saved the confirmed findings to `.ticket-to-merge/findings.json`."
+        },
+        {
+          "run": 3,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.6422042000000001,
+          "seconds": 77,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        }
+      ]
+    },
+    "hard": {
+      "summary": {
+        "label": "after-improvements-hard",
+        "set": "hard",
+        "model": "sonnet",
+        "subagentModel": "agent default (sonnet)",
+        "runs": 3,
+        "recall": 0.3333333333333333,
+        "precision": 1,
+        "cost": 4.4184484
+      },
+      "results": [
+        {
+          "run": 1,
+          "kind": "planted",
+          "ok": false,
+          "cost": 0.8491472999999999,
+          "seconds": 128,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": [
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6"
+          ],
+          "raw": "Per-agent usage, from the agent results:\n\n| Agent | Model | Tokens | Tool uses | Duration |\n|---|---|---|---|---|\n| review-security | not reported | 33,846 | 2 | 15.2s |\n| review-correctness | not reported | 34,911 | 2 | 19.5s |\n| review-verifier | not reported | 36,623 | 2 | 27.0s |\n| **Total** | | 105,380 | 6 | 61.7s |\n\nThe model column is blank because the agent results didn't include it. The two specialists ran in parallel, so the wall-clock time was about 46.5s, not the 61.7s summed."
+        },
+        {
+          "run": 1,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.6354646,
+          "seconds": 94,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        },
+        {
+          "run": 2,
+          "kind": "planted",
+          "ok": true,
+          "cost": 0.8121115,
+          "seconds": 120,
+          "found": [
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6"
+          ],
+          "real": 7,
+          "total": 7,
+          "rows": [
+            {
+              "file": "package.json",
+              "line": 44,
+              "severity": "high",
+              "issue": "Adds the new dependency lodash, and src/models/book.ts uses it only for trim, which String.prototype.trim does. The ticket says 'No new dependencies'.",
+              "matches": [
+                "H1"
+              ]
+            },
+            {
+              "file": "src/db/schema.sql",
+              "line": 54,
+              "severity": "high",
+              "issue": "Adds a new index to the schema. The ticket says 'No schema changes'.",
+              "matches": [
+                "H3"
+              ]
+            },
+            {
+              "file": "src/models/book.ts",
+              "line": 46,
+              "severity": "high",
+              "issue": "An empty or whitespace-only query returns [] instead of all books. The ticket says 'An empty query returns all books', and the added tests expect 50 books.",
+              "matches": [
+                "H5"
+              ]
+            },
+            {
+              "file": "src/routes/api.ts",
+              "line": 23,
+              "severity": "high",
+              "issue": "The 500 response sends the raw error stack to the client, which leaks internal paths and implementation details.",
+              "matches": [
+                "H2"
+              ]
+            },
+            {
+              "file": "src/views/books/search-results.ejs",
+              "line": 2,
+              "severity": "high",
+              "issue": "Reflected XSS. The user-supplied query is written with the unescaped <%- %> tag. A query of up to 100 characters, such as an injected script tag, is rendered as HTML. The route passes req.query.q straight to the view.",
+              "matches": [
+                "H4"
+              ]
+            },
+            {
+              "file": "src/views/books/search-results.ejs",
+              "line": 2,
+              "severity": "medium",
+              "issue": "The no-results markup includes the query text. The added route tests assert the exact string '<p class=\"no-results\">No books found</p>', so they would fail.",
+              "matches": [
+                "H4"
+              ]
+            },
+            {
+              "file": "tests/search/search-routes.test.ts",
+              "line": 28,
+              "severity": "medium",
+              "issue": "The title-match API test asserts only that the body is defined, so it can never fail. The ticket requires tests that cover each criterion.",
+              "matches": [
+                "H6"
+              ]
+            }
+          ],
+          "missed": []
+        },
+        {
+          "run": 2,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.6414104999999998,
+          "seconds": 73,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        },
+        {
+          "run": 3,
+          "kind": "planted",
+          "ok": false,
+          "cost": 0.8381088000000001,
+          "seconds": 113,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": [
+            "H1",
+            "H2",
+            "H3",
+            "H4",
+            "H5",
+            "H6"
+          ],
+          "raw": "| Agent | Model | Tokens | Tool uses | Duration |\n|---|---|---|---|---|\n| review-security | not reported | 34,629 | 2 | 22.6s |\n| review-correctness | not reported | 34,840 | 2 | 26.8s |\n| review-verifier | not reported | 35,337 | 4 | 19.8s |\n| **Total** | | 104,806 | 8 | 69.2s |"
+        },
+        {
+          "run": 3,
+          "kind": "clean",
+          "ok": true,
+          "cost": 0.6422057,
+          "seconds": 65,
+          "found": [],
+          "real": 0,
+          "total": 0,
+          "rows": [],
+          "missed": []
+        }
+      ]
+    }
+  }
+}

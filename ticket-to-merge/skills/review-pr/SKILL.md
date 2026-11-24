@@ -35,5 +35,5 @@ If both returned `[]`, skip to step 4. Otherwise call **ticket-to-merge:review-v
 ## 4. Report
 1. `node "${CLAUDE_PLUGIN_ROOT}/hooks/phase.mjs" off` (when called from ship-ticket, it sets the next phase itself).
 2. Finalize, always as the last step. If the verifier ran: `node "${CLAUDE_PLUGIN_ROOT}/scripts/finalize-findings.mjs" --spec <spec used>`. If you skipped it: the same command with `--none` added. The script corrects line numbers from the quoted evidence, drops findings far from any change, holds back findings the verifier marked not proven, and saves the result to `.ticket-to-merge/findings.json`. If it exits with an error, print the verifier's `confirmed` list in the same shape yourself.
-3. Print the script's output as it is: it is the report, and its JSON block must be the only fenced block in your reply.
+3. The user can't see tool output, so your reply must contain the report: copy the script's whole stdout into your reply word for word, starting with its `Review of` line and including its ```json block. Don't summarize it or point to it ("the report above"). That JSON block must be the only fenced block in your reply.
 4. A row per agent call (agent, model, tokens, tool uses, duration) plus a Total row, taken from the agent results.
