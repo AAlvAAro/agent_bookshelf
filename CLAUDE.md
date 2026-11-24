@@ -22,7 +22,7 @@ The current ticket is in `SPEC.md`. Read it before changing code.
 4. **Never touch** `bookshelf.db*`, `src/db/seed.sql`, `.env`. A hook blocks it; don't try to work around it.
 5. **Tests first.** New behaviour gets a failing test, then the code. Name tests after the spec criterion (`AC3 trims input`).
    While implementing, `tests/` is read-only: if a test looks wrong, stop and say so.
-6. **Boring is good**: smallest change that meets the spec. No refactors, renames or style changes outside the ticket.
+6. **Least new code**: smallest change that meets the spec; reuse what the codebase already has before adding anything new. No refactors, renames or style changes outside the ticket.
 7. Keep the interface in `SPEC.md` exactly: paths, status codes, response shapes, error messages.
 8. Specific routes go before parameter routes (`/books/search` before `/books/:id`).
 

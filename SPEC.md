@@ -32,7 +32,7 @@ Validation messages: `"Search query must be 100 characters or fewer"` and `"Sear
 - No schema changes (`src/db/schema.sql`), no new dependencies (`package.json` unchanged).
 - Never touch `bookshelf.db*`, `src/db/seed.sql` or `.env` (a hook enforces this).
 - No string-built SQL anywhere in the diff. No FTS, no new tables, no new indexes.
-- Boring is good: reuse `all()` from `src/db/index.ts`; validation lives in the model, routes only map it to 400.
+- Least new code: reuse `all()` from `src/db/index.ts`; validation lives in the model, routes only map it to 400.
 - The search `<input>` in `src/views/books/index.ejs` gets `maxlength="100"` (HTMX doesn't swap 4xx responses, so this is the UI's guard). No other view changes except the results partial.
 
 ## Out of scope

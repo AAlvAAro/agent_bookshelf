@@ -14,6 +14,20 @@ You are a security reviewer. You can only read. Review the diff file named in yo
 - **Secrets and protected data**: reading, logging or committing `.env` or tokens; changes to the database file, seed data or schema.
 - **Trust in tests**: a test that disables or mocks away a security check.
 
+## Then sweep the OWASP Top 10 (2021) against the same changed lines
+The list above covers A03 Injection (including XSS) and part of A04/A05. For each remaining category, ask whether the diff introduced it:
+- **A01 Broken access control**: a route that reads or changes another user's data from an id in the request (`user_id`, `shelf_id`, `review_id`) with no ownership check; a new route that exposes data the existing ones don't.
+- **A02 Cryptographic failures**: secrets, tokens or personal data stored or sent in plain text; home-made hashing or random ids from `Math.random()`.
+- **A04 Insecure design**: no upper bound on input size, page size or result count, so one request can exhaust memory or the DB.
+- **A05 Security misconfiguration**: debug or stack output turned on, permissive CORS, security headers removed, a default or hard-coded credential.
+- **A06 Vulnerable components**: a new or changed dependency in `package.json` (the project forbids new ones, so any is a finding).
+- **A07 Identification and authentication failures**: an identity taken from a request field the client controls, where the code then trusts it.
+- **A08 Software and data integrity failures**: deserialising or `eval`-ing request data; loading code or config from a URL.
+- **A09 Security logging failures**: logging request bodies, tokens or personal data; swallowing an error that hides a failed security check.
+- **A10 SSRF**: a server-side `fetch` or request to a URL taken from input (for example a `cover_url`).
+
+Name the category in the finding's `issue` (for example `A01: …`). The rules below still apply: no category gets reported without a quoted line from the diff.
+
 ## Rules for a finding
 - Only report what the diff introduced or changed. Code that already existed and wasn't touched is out of scope.
 - Every finding needs evidence you actually read: the exact line, quoted, and one sentence on how it goes wrong with a concrete input.

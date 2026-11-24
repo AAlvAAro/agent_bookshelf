@@ -50,7 +50,7 @@ flowchart LR
 |---|---|---|---|
 | `tester` | Read, Grep, Glob, Write, Edit, Bash | sonnet | One failing test per acceptance criterion, named `AC<n> ...`. Can't write `src/`. |
 | `implementer` | Read, Grep, Glob, Write, Edit, Bash | sonnet | Smallest change that makes the tests pass. Can't write `tests/`. |
-| `review-security` | Read, Grep, Glob | sonnet | Injection, validation that is missing or skippable, unsafe output, secrets. |
+| `review-security` | Read, Grep, Glob | sonnet | Injection, validation that is missing or skippable, unsafe output, secrets, then an OWASP Top 10 sweep. |
 | `review-correctness` | Read, Grep, Glob | sonnet | Criterion by criterion against the spec; boundaries, interface drift, tests that can't fail. |
 | `review-verifier` | Read, Grep, Glob | sonnet | Tries to disprove each candidate finding; keeps only what holds, merges duplicates. |
 
