@@ -3,7 +3,7 @@
 // Protects bookshelf.db*, src/db/seed.sql and .env (see lib.mjs PROTECTED).
 // String matching can't see through every obfuscation, so layer 2 (integrity.mjs) re-checks
 // file hashes after every tool call and restores anything that changed.
-import { readInput, block, projectRoot, protectedKind, isAncestorOfProtected, ensureBaseline } from './lib.mjs';
+import { readInput, block, projectRoot, protectedKind, isAncestorOfProtected, ensureBaseline, readState, lockedDir, PHASES } from './lib.mjs';
 
 const input = readInput();
 const tool = input.tool_name || '';
@@ -12,6 +12,35 @@ const root = projectRoot(input);
 const cwd = input.cwd || root;
 
 try { ensureBaseline(root); } catch {}
+
+// Phase lock (see lib.mjs PHASES): the tester can't write src/, the implementer can't write tests/.
+const phase = readState(root).phase;
+const inSubagent = Boolean(input.agent_id || input.agent_type);
+const STATE_RE = /\.git\/ticket-to-merge|ticket-to-merge\/(phase|baseline)\.json/;
+
+function checkPhasePath(p) {
+  if (STATE_RE.test(String(p || ''))) block('the guardrail state is not editable.');
+  const dir = lockedDir(p, root, cwd, phase);
+  if (dir) block(`${dir}/ is read-only in the '${phase}' phase. If something in ${dir}/ looks wrong, stop and report it instead of changing it.`);
+}
+
+function checkPhaseBash(cmd) {
+  if (STATE_RE.test(cmd)) block('the guardrail state is not editable.');
+  // Only the orchestrator (main session) switches phases.
+  if (/phase\.mjs/.test(cmd) && inSubagent) block('only the ship-ticket orchestrator changes the phase.');
+  if (phase === 'off') return;
+  if (/\bgit\s+(checkout|restore|reset|stash|rm|mv|apply|am|revert|cherry-pick|rebase|merge|clean)\b/.test(cmd)) {
+    block(`git commands that rewrite the working tree are not allowed in the '${phase}' phase.`);
+  }
+  for (const dir of PHASES[phase]) {
+    const target = `(^|[\\s/=])${dir}(/|\\s|$)`;
+    const verb = new RegExp(`(^|[;&|(\\s])(rm|mv|cp|ln|tee|truncate|dd|touch|install|rsync|mkdir|sed\\s+(-[a-zA-Z]*i|--in-place)|perl\\s+-[a-zA-Z]*i)\\b[^;&|]*${target}`);
+    const redirect = new RegExp(`>{1,2}\\s*\\S*\\b${dir}/`);
+    if (verb.test(cmd) || redirect.test(cmd)) {
+      block(`${dir}/ is read-only in the '${phase}' phase. If something in ${dir}/ looks wrong, stop and report it instead of changing it.`);
+    }
+  }
+}
 
 const WRITE_API = /(writeFile|appendFile|unlink|rmSync|rmdirSync|\brm\(|rename|copyFile|truncate|createWriteStream|\bopen\s*\(|os\.remove|shutil|\.write_text|\.write_bytes|DROP\s+TABLE|DELETE\s+FROM|UPDATE\s+\w+\s+SET|INSERT\s+INTO)/i;
 // Name must start at a path boundary: /tmp/test-bookshelf.db (the tests' DB) is not protected.
@@ -32,6 +61,7 @@ switch (tool) {
   case 'MultiEdit':
   case 'NotebookEdit': {
     checkPath(ti.file_path || ti.notebook_path);
+    checkPhasePath(ti.file_path || ti.notebook_path);
     // A script that will write to a protected file later (node tamper.mjs) is blocked when written.
     const text = [ti.content, ti.new_string, ...(ti.edits || []).map((e) => e.new_string)].filter(Boolean).join('\n');
     const name = String(ti.file_path || '');
@@ -46,6 +76,7 @@ switch (tool) {
     const raw = String(ti.command || '');
     // De-obfuscate the usual tricks: quotes and backslashes inside words (book''shelf.db, seed\.sql).
     const cmd = raw.replace(/\\\n/g, ' ').replace(/['"\\]/g, '');
+    checkPhaseBash(cmd);
 
     // 1. Inline code and decoded payloads can't be inspected reliably: block them outright.
     if (/\b(node|deno|bun)\s+(-e|--eval|-p|--print)\b|\bpython3?\s+-c\b|\b(perl|ruby)\s+-[a-z]*e\b|\b(ba|z|da|k)?sh\s+-c\b|\beval\b|base64\s+(-d|--decode|-D)|\bxxd\s+-r/.test(cmd)) {

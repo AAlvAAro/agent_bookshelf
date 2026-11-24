@@ -122,3 +122,75 @@ export function verifyAndRestore(root) {
 }
 
 export { sep };
+
+// ---- phase lock (stage 2) ----
+// ship-ticket runs in phases. Each phase locks the directories its agent must not write:
+// the tester can't touch src/, the implementer can't touch tests/, reviewers can't touch either.
+// The phase lives next to the baseline in .git/ticket-to-merge/, set only through hooks/phase.mjs.
+export const PHASES = { off: [], test: ['src'], implement: ['tests'], review: ['src', 'tests'] };
+
+const git = (root, args) => execFileSync('git', args, { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+
+/** Fingerprint of a directory's state relative to HEAD (tracked changes + untracked file names). */
+function dirState(root, dir) {
+  try {
+    const status = git(root, ['status', '--porcelain', '--', dir]);
+    const diff = git(root, ['diff', 'HEAD', '--', dir]);
+    return { clean: status.trim() === '', sig: createHash('sha256').update(status + diff).digest('hex') };
+  } catch {
+    return { clean: false, sig: null }; // not a git repo or no commits yet: nothing to compare against
+  }
+}
+
+export function readState(root) {
+  try {
+    const st = JSON.parse(readFileSync(join(stateDir(root), 'phase.json'), 'utf8'));
+    return PHASES[st.phase] ? st : { phase: 'off', locked: {}, gateBlocks: 0 };
+  } catch {
+    return { phase: 'off', locked: {}, gateBlocks: 0 };
+  }
+}
+
+export function writeState(root, st) {
+  mkdirSync(stateDir(root), { recursive: true });
+  writeFileSync(join(stateDir(root), 'phase.json'), JSON.stringify(st, null, 2));
+}
+
+export function setPhase(root, phase) {
+  if (!PHASES[phase]) throw new Error(`unknown phase '${phase}' (use: ${Object.keys(PHASES).join(', ')})`);
+  const locked = {};
+  for (const dir of PHASES[phase]) locked[dir] = dirState(root, dir);
+  writeState(root, { phase, locked, gateBlocks: 0 });
+  return locked;
+}
+
+/** If this path is inside a directory locked by the current phase, return that directory. */
+export function lockedDir(filePath, root, cwd, phase) {
+  if (!filePath) return null;
+  const abs = isAbsolute(String(filePath)) ? String(filePath) : resolve(cwd || root, String(filePath));
+  const rel = relative(root, abs);
+  return (PHASES[phase] || []).find((dir) => rel === dir || rel.startsWith(dir + sep)) || null;
+}
+
+/** Layer 2 for the phase lock: a locked directory that changed is put back to HEAD. */
+export function verifyLocked(root) {
+  const st = readState(root);
+  const problems = [];
+  for (const dir of PHASES[st.phase]) {
+    const before = st.locked?.[dir];
+    const now = dirState(root, dir);
+    if (!before || !before.sig || now.sig === before.sig) continue;
+    if (before.clean) {
+      try {
+        git(root, ['checkout', 'HEAD', '--', dir]);
+        git(root, ['clean', '-fdq', '--', dir]);
+      } catch {}
+      problems.push(`${dir}/ is read-only in the '${st.phase}' phase; your change was reverted to the last commit`);
+    } else {
+      st.locked[dir] = now; // tree was already dirty when the phase started: report once, never discard a human's work
+      writeState(root, st);
+      problems.push(`${dir}/ is read-only in the '${st.phase}' phase and it changed; undo that change`);
+    }
+  }
+  return problems;
+}

@@ -30,3 +30,4 @@ The current ticket is in `SPEC.md`. Read it before changing code.
 - Work on a feature branch, never `main`. Small Conventional Commits (`feat:`, `test:`, `fix:`, `docs:`, `chore:`).
 - Fix a bug with a new commit; never amend or rewrite history. Never push without asking.
 - Commit only when `npm run test:run` is green.
+  One exception: the `test:` commit that adds failing tests before the implementation (red first).
