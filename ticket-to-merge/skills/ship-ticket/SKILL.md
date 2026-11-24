@@ -37,7 +37,7 @@ The phase makes directories read-only through a hook: `test` locks `src/`, `impl
 
 ## 3. Review
 1. Phase `review`.
-2. Run the review exactly as the `review-pr` skill of this plugin describes, on `$BASE..HEAD`. It returns verified JSON findings.
+2. Run the review exactly as the `review-pr` skill of this plugin describes (read `${CLAUDE_PLUGIN_ROOT}/skills/review-pr/SKILL.md`), passing `$BASE` as the base. It returns verified JSON findings.
 3. No findings of severity `high` or `medium`: go to step 5.
 
 ## 4. Fix loop (at most 2 rounds)
