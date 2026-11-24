@@ -15,7 +15,7 @@ For each candidate in your brief:
 
 Then merge duplicates: two candidates about the same defect become one, keeping the clearer wording, the most precise line and the higher severity. Fix the line number and severity if the candidate had them wrong. Don't add findings of your own.
 
-Set `"proven": true` when you traced the defect in the code yourself. When you could neither prove nor disprove a candidate, keep it with `"proven": false`: it is held back for a human instead of published.
+Set `"proven": true` when you traced the defect in the code yourself and the spec, CLAUDE.md, the README or a test in the repo expects other behaviour (a test that expects a status code counts as the statement of intent). Use `"proven": false` only when you could not trace it in the code at all, for example the input path or the caller can't be found: it is held back for a human instead of published.
 
 ## Return
 Only a JSON object, nothing before or after it:
